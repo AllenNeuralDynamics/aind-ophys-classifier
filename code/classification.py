@@ -19,10 +19,11 @@ class Plane:
     input_extraction_file: Path
     output_dir: Path
     output_classification_file: Path
+    rois: np.array
 
 
 
-def classify_plane(rois, soma_classifier, dendrite_classifier):
+def classify_plane(rois: np.array, um_per_pixel: float, soma_classifier, dendrite_classifier):
     # ROInet embedding
     roinet = roicat.ROInet.ROInet_embedder(
         device=roicat.helpers.set_device(),  ## Which torch device to use ('cpu', 'cuda', etc.)
@@ -67,21 +68,26 @@ def find_um_per_pixel(input_dir: Path) -> float:
 
     return um_per_pixel
 
-def prepare_planes(input_dir: Path, output_dir: Path) -> List[Plane]:
-    planes = []
-    for path in Path(input_dir).rglob('*extraction.h5'):
-        plane_name = path.parts[-3]
-        output_dir = output_dir / "classification" / plane_name
-        plane = Plane(
-            name=plane_name, 
-            input_extraction_file=path,
-            output_dir=output_dir,
-            output_classification_file=output_dir / "classification.h5"
-        )
-        planes.append(plane)
-        plane.output_dir.mkdir(parents=True, exist_ok=True)
+def prepare_plane(extraction_file: Path, output_dir: Path) -> List[Plane]:
+    plane_name = path.parts[-3]
+    plane_dir = output_dir / "classification" / plane_name
+    plane = Plane(
+        name=plane_name, 
+        input_extraction_file=path,
+        output_dir=plane_dir,
+        output_classification_file=plane_dir / "classification.h5",
+        rois=load_extraction_rois(extraction_file)
+    )
+    
+    plane.output_dir.mkdir(parents=True, exist_ok=True)
+    
+    return plane
 
-    return planes
+def load_extraction_rois(extraction_file: Path) -> np.array:
+    with h5py.File(extraction_file) as f:
+        return sparse.COO(
+            f["rois/coords"], f["rois/data"], f["rois/shape"]
+        ).todense()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -115,8 +121,7 @@ if __name__ == "__main__":
     output_dir = Path(args.output_dir).resolve()
 
     um_per_pixel = find_um_per_pixel(input_dir)
-    planes = prepare_planes(input_dir, output_dir)
-
+    
     soma_classifier = (
         roicat.classification.classifier.Load_ONNX_model_sklearnLogisticRegression(
             args.soma_classifier_path
@@ -129,20 +134,22 @@ if __name__ == "__main__":
         )
     )
 
-    for plane in planes:
-        with h5py.File(plane.input_extraction_file) as f:
-            rois = sparse.COO(
-                f["rois/coords"], f["rois/data"], f["rois/shape"]
-            ).todense()
+    for path in Path(input_dir).rglob('*extraction.h5'):
+        plane = prepare_plane(path, output_dir)
 
-        soma_predictions, soma_probabilities, dendrite_predictions, dendrite_probabilities = classify_plane(rois, dendrite_classifier, soma_classifier)
+        soma_predictions, soma_probabilities, dendrite_predictions, dendrite_probabilities = classify_plane(
+            rois=plane.rois, 
+            um_per_pixel=um_per_pixel,
+            soma_classifier=soma_classifier,
+            dendrite_classifier=dendrite_classifier,             
+        )
     
         # save results
         with h5py.File(plane.output_classification_file, "w") as f:
             g = f.create_group("soma")
             g.create_dataset("predictions", data=soma_predictions)
             g.create_dataset("probabilities", data=soma_probabilities)
-            
+
             g = f.create_group("dendrites")
-            g.create_dataset("dendrite_predictions", data=dendrite_predictions)
-            g.create_dataset("dendrite_probabilities", data=dendrite_probabilities)
+            g.create_dataset("predictions", data=dendrite_predictions)
+            g.create_dataset("probabilities", data=dendrite_probabilities)
