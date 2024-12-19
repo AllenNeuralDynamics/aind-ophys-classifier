@@ -139,7 +139,9 @@ if __name__ == "__main__":
     
         # save results
         with h5py.File(plane.output_classification_file, "w") as f:
-            f.create_dataset("soma_predictions", data=soma_predictions)
-            f.create_dataset("soma_probabilities", data=soma_probabilities)
-            f.create_dataset("dendrite_predictions", data=dendrite_predictions)
-            f.create_dataset("dendrite_probabilities", data=dendrite_probabilities)
+            g = f.create_group("soma")
+            g.create_dataset("predictions", data=soma_predictions)
+            f.create_dataset("probabilities", data=soma_probabilities)
+            g = f.create_group("dendrites")
+            g.create_dataset("dendrite_predictions", data=dendrite_predictions)
+            g.create_dataset("dendrite_probabilities", data=dendrite_probabilities)
