@@ -11,6 +11,7 @@ import numpy as np
 import roicat
 import sparse
 from pint import UnitRegistry
+from typing import List
 
 @dataclass
 class Plane:
@@ -45,6 +46,42 @@ def classify_plane(rois, soma_classifier, dendrite_classifier):
 
     return soma_predictions, soma_probabilities, dendrite_predictions, dendrite_probabilities
 
+def find_um_per_pixel(input_dir: Path) -> float:
+    # get um_per_pixel and dims (FOV size) from session.json
+    try:
+        session_json_fp = next(input_dir.glob("session.json"))
+    except StopIteration:
+        session_json_fp = next(input_dir.glob("*/session.json"))
+    with open(session_json_fp, "r") as j:
+        session_data = json.load(j)
+    for data_stream in session_data["data_streams"]:
+        if data_stream.get("ophys_fovs"):
+            fov = data_stream["ophys_fovs"][0]
+            um_per_pixel = (
+                float(fov["fov_scale_factor"])
+                * (UnitRegistry().parse_expression(fov["fov_scale_factor_unit"]))
+                .to("um/pixel")
+                .magnitude
+            )
+            dims = (fov["fov_height"], fov["fov_width"])
+
+    return um_per_pixel
+
+def prepare_planes(input_dir: Path, output_dir: Path) -> List[Plane]:
+    planes = []
+    for path in Path(input_dir).rglob('*extraction.h5'):
+        plane_name = path.parts[-3]
+        output_dir = output_dir / "classification" / plane_name
+        plane = Plane(
+            name=plane_name, 
+            input_extraction_file=path,
+            output_dir=output_dir,
+            output_classification_file=output_dir / "classification.h5"
+        )
+        planes.append(plane)
+        plane.output_dir.mkdir(parents=True, exist_ok=True)
+
+    return planes
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -77,6 +114,9 @@ if __name__ == "__main__":
     input_dir = Path(args.input_dir).resolve()
     output_dir = Path(args.output_dir).resolve()
 
+    um_per_pixel = find_um_per_pixel(input_dir)
+    planes = prepare_planes(input_dir, output_dir)
+
     soma_classifier = (
         roicat.classification.classifier.Load_ONNX_model_sklearnLogisticRegression(
             args.soma_classifier_path
@@ -88,38 +128,6 @@ if __name__ == "__main__":
             args.dendrite_classifier_path
         )
     )
-    
-    # get um_per_pixel and dims (FOV size) from session.json
-    try:
-        session_json_fp = next(input_dir.glob("session.json"))
-    except StopIteration:
-        session_json_fp = next(input_dir.glob("*/session.json"))
-    with open(session_json_fp, "r") as j:
-        session_data = json.load(j)
-    for data_stream in session_data["data_streams"]:
-        if data_stream.get("ophys_fovs"):
-            fov = data_stream["ophys_fovs"][0]
-            um_per_pixel = (
-                float(fov["fov_scale_factor"])
-                * (UnitRegistry().parse_expression(fov["fov_scale_factor_unit"]))
-                .to("um/pixel")
-                .magnitude
-            )
-            dims = (fov["fov_height"], fov["fov_width"])
-
-    # get ROIs
-    planes = []
-    for path in Path('/data').rglob('*extraction.h5'):
-        plane_name = path.parts[-3]
-        output_dir = Path(args.output_dir) / "classification" / plane_name
-        plane = Plane(
-            name=plane_name, 
-            input_extraction_file=path,
-            output_dir=output_dir,
-            output_classification_file=output_dir / "classification.h5"
-        )
-        planes.append(plane)
-        plane.output_dir.mkdir(parents=True, exist_ok=True)
 
     for plane in planes:
         with h5py.File(plane.input_extraction_file) as f:
