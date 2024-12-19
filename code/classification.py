@@ -4,6 +4,7 @@ import os
 from datetime import datetime as dt
 from datetime import timezone as tz
 from pathlib import Path
+from dataclasses import dataclass
 
 import h5py
 import numpy as np
@@ -11,55 +12,14 @@ import roicat
 import sparse
 from pint import UnitRegistry
 
-
-def find_file(root_folder, target_file):
-    """
-    Recursively searches for a file with a specific name within a directory tree.
-
-    Parameters
-    ----------
-    root_folder : str
-        The root directory to start searching from.
-    target_file : str
-        The name of the file to search for.
-
-    Returns
-    -------
-    str or None
-        The full path to the file if found, or None if the file is not found.
-
-    Examples
-    --------
-    >>> find_file('/path/to/search', 'target_file.txt')
-    '/path/to/search/subfolder/target_file.txt'
-    """
-    for dirpath, dirnames, filenames in os.walk(root_folder):
-        if target_file in filenames:
-            return os.path.join(dirpath, target_file)
-    return None
-
-
-def make_output_directory(output_dir: Path, experiment_id: str) -> str:
-    """Creates the output directory if it does not exist
-
-    Parameters
-    ----------
+@dataclass
+class Plane:
+    name: str
+    input_extraction_file: Path
     output_dir: Path
-        output directory
-    experiment_id: str
-        experiment_id number
+    output_classification_file: Path
 
-    Returns
-    -------
-    output_dir: str
-        output directory
-    """
-    output_dir = output_dir / experiment_id
-    output_dir.mkdir(exist_ok=True)
-    output_dir = output_dir / "classification"
-    output_dir.mkdir(exist_ok=True)
 
-    return output_dir
 
 def classify_plane(rois, soma_classifier, dendrite_classifier):
     # ROInet embedding
@@ -148,9 +108,21 @@ if __name__ == "__main__":
             dims = (fov["fov_height"], fov["fov_width"])
 
     # get ROIs
+    planes = []
     for path in Path('/data').rglob('*extraction.h5'):
-        plane_id = path.parts[-2]
-        with h5py.File(path) as f:
+        plane_name = path.parts[-3]
+        output_dir = Path(args.output_dir) / "classification" / plane_name
+        plane = Plane(
+            name=plane_name, 
+            input_extraction_file=path,
+            output_dir=output_dir,
+            output_classification_file=output_dir / "classification.h5"
+        )
+        planes.append(plane)
+        plane.output_dir.mkdir(parents=True, exist_ok=True)
+
+    for plane in planes:
+        with h5py.File(plane.input_extraction_file) as f:
             rois = sparse.COO(
                 f["rois/coords"], f["rois/data"], f["rois/shape"]
             ).todense()
@@ -158,9 +130,8 @@ if __name__ == "__main__":
         soma_predictions, soma_probabilities, dendrite_predictions, dendrite_probabilities = classify_plane(rois, dendrite_classifier, soma_classifier)
     
         # save results
-        with h5py.File(output_dir / "classification.h5", "w") as f:
-            grp = f.create_group(str(plane_id))
-            grp.create_dataset("soma_predictions", data=soma_predictions)
-            grp.create_dataset("soma_probabilities", data=soma_probabilities)
-            grp.create_dataset("dendrite_predictions", data=dendrite_predictions)
-            grp.create_dataset("dendrite_probabilities", data=dendrite_probabilities)
+        with h5py.File(plane.output_classification_file, "w") as f:
+            f.create_dataset("soma_predictions", data=soma_predictions)
+            f.create_dataset("soma_probabilities", data=soma_probabilities)
+            f.create_dataset("dendrite_predictions", data=dendrite_predictions)
+            f.create_dataset("dendrite_probabilities", data=dendrite_probabilities)
