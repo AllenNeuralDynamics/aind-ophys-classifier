@@ -1,0 +1,32 @@
+{
+	"version": 1,
+	"base_image": "codeocean/pytorch:2.4.0-cuda12.4.0-mambaforge24.5.0-0-python3.12.4-ubuntu22.04",
+	"options": {
+		"registry_host_arg": true,
+		"git_ask_pass": true
+	},
+	"installers": {
+		"pip": {
+			"packages": [
+				{
+					"name": "h5py",
+					"version": "3.12.1"
+				},
+				{
+					"name": "pint",
+					"version": "0.24.4"
+				},
+				{
+					"name": "roicat[all]",
+					"version": "1.4.4"
+				},
+				{
+					"name": "sparse",
+					"version": "0.15.4"
+				}
+			],
+			"options": {},
+			"pre_install_options": {}
+		}
+	}
+}
