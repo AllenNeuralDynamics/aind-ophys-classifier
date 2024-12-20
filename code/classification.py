@@ -1,11 +1,11 @@
 import argparse
 import json
 import os
-from datetime import datetime as dt
 from datetime import timezone as tz
 from pathlib import Path
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
+from datetime import datetime as dt
 
 import h5py
 import numpy as np
@@ -14,6 +14,8 @@ import sparse
 from pint import UnitRegistry
 from typing import List
 from plots import plot_probabilities, plot_predictions, plot_border_rois
+
+from aind_data_schema.core.processing import (DataProcess, ProcessName)
 
 
 @dataclass
@@ -221,3 +223,19 @@ if __name__ == "__main__":
 
             g = f.create_group("border")
             g.create_dataset("labels", data=border_rois)
+
+    with open(output_dir / "data_process.json", "w") as f:
+        dp = DataProcess(
+            name=ProcessName.IMAGE_CELL_CLASSIFICATION,
+            software_version=os.getenv("VERSION", ""),
+            start_date_time=start_time,
+            end_date_time=dt.now(),
+            input_location=str(input_dir),
+            output_location=str(output_dir),
+            code_url=(os.getenv("CODE_URL")),
+            parameters={
+                "border_size": args.border_size,
+                "model": "aind-roi-classifier-0.0.1"
+            },
+        )
+        f.write(dp.model_dump_json(indent=3))

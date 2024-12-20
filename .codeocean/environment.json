@@ -9,6 +9,9 @@
 		"pip": {
 			"packages": [
 				{
+					"name": "aind-data-schema"
+				},
+				{
 					"name": "h5py",
 					"version": "3.12.1"
 				},
@@ -28,5 +31,15 @@
 			"options": {},
 			"pre_install_options": {}
 		}
-	}
+	},
+	"env_variables": [
+		{
+			"name": "VERSION",
+			"value": "0.1.0"
+		},
+		{
+			"name": "CODE_URL",
+			"value": "https://github.com/allenNeuralDynamics/aind-ophys-classifier"
+		}
+	]
 }
