@@ -1,4 +1,4 @@
-# hash:sha256:99cfc43eaa0029f35154505ace69aff54a00c422fea544f72f7c44c35f3ba837
+# hash:sha256:e14e95874d3a276e0fca3c2dfed9d49685e975a5a8fe48638da600226f732977
 ARG REGISTRY_HOST
 FROM $REGISTRY_HOST/codeocean/pytorch:2.4.0-cuda12.4.0-mambaforge24.5.0-0-python3.12.4-ubuntu22.04
 
@@ -12,7 +12,7 @@ ENV VERSION=0.1.0
 ENV CODE_URL=https://github.com/allenNeuralDynamics/aind-ophys-classifier
 
 RUN pip install -U --no-cache-dir \
-    aind-data-schema \
+    aind-data-schema==1.2.0 \
     h5py==3.12.1 \
     pint==0.24.4 \
     roicat[all]==1.4.4 \
