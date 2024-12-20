@@ -5,6 +5,7 @@ from datetime import datetime as dt
 from datetime import timezone as tz
 from pathlib import Path
 from dataclasses import dataclass
+import matplotlib.pyplot as plt
 
 import h5py
 import numpy as np
@@ -12,6 +13,7 @@ import roicat
 import sparse
 from pint import UnitRegistry
 from typing import List
+from plots import plot_probabilities, plot_predictions
 
 @dataclass
 class Plane:
@@ -35,9 +37,13 @@ def classify_plane(rois: np.array, um_per_pixel: float, soma_classifier, dendrit
         verbose=False,  ## Whether to print updates
     )
 
+    data = roicat.data_importing.Data_roicat()
+    data.set_spatialFootprints(rois, um_per_pixel=um_per_pixel)
+    data.transform_spatialFootprints_to_ROIImages(out_height_width=(36, 36))
+    
     roinet.generate_dataloader(
-        ROI_images=[rois],  # data.ROI_images,  ## Input images of ROIs
-        um_per_pixel=um_per_pixel,  # data.um_per_pixel,  ## Resolution of FOV
+        ROI_images=data.ROI_images,  ## Input images of ROIs
+        um_per_pixel=data.um_per_pixel,  ## Resolution of FOV
         pref_plot=False,  ## Whether or not to plot the ROI sizes
     )
     roinet.generate_latents()
@@ -143,7 +149,19 @@ if __name__ == "__main__":
             soma_classifier=soma_classifier,
             dendrite_classifier=dendrite_classifier,             
         )
-    
+        
+        ax = plot_probabilities(plane.rois, soma_probabilities, "soma probabilities")
+        plt.savefig(str(plane.output_dir / "soma_probabilities.png"))
+
+        ax = plot_probabilities(plane.rois, dendrite_probabilities, "dendrite probabilities")
+        plt.savefig(str(plane.output_dir / "dendrite_probabilities.png"))
+
+        ax = plot_predictions(plane.rois, soma_predictions, "soma predictions")
+        plt.savefig(str(plane.output_dir / "soma_predictions.png"))
+
+        ax = plot_predictions(plane.rois, dendrite_predictions, "dendrite predictions")
+        plt.savefig(str(plane.output_dir / "dendrite_predictions.png"))
+        
         # save results
         with h5py.File(plane.output_classification_file, "w") as f:
             g = f.create_group("soma")
