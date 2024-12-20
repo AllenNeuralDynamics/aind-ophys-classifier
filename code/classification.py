@@ -1,21 +1,21 @@
 import argparse
 import json
 import os
+from dataclasses import dataclass
+from datetime import datetime as dt
 from datetime import timezone as tz
 from pathlib import Path
-from dataclasses import dataclass
-import matplotlib.pyplot as plt
-from datetime import datetime as dt
+from typing import List
 
 import h5py
+import matplotlib.pyplot as plt
 import numpy as np
 import roicat
 import sparse
+from aind_data_schema.core.processing import DataProcess, ProcessName
 from pint import UnitRegistry
-from typing import List
-from plots import plot_probabilities, plot_predictions, plot_border_rois
 
-from aind_data_schema.core.processing import (DataProcess, ProcessName)
+from plots import plot_border_rois, plot_predictions, plot_probabilities
 
 
 @dataclass
@@ -87,7 +87,7 @@ def find_um_per_pixel(input_dir: Path) -> float:
 
 def prepare_plane(extraction_file: Path, output_dir: Path) -> List[Plane]:
     plane_name = path.parts[-3]
-    plane_dir = output_dir / "classification" / plane_name
+    plane_dir = output_dir / plane_name / "classification"
     plane = Plane(
         name=plane_name,
         input_extraction_file=path,
@@ -235,7 +235,7 @@ if __name__ == "__main__":
             code_url=(os.getenv("CODE_URL")),
             parameters={
                 "border_size": args.border_size,
-                "model": "aind-roi-classifier-0.0.1"
+                "model": "aind-roi-classifier-0.0.1",
             },
         )
         f.write(dp.model_dump_json(indent=3))

@@ -1,6 +1,6 @@
-from matplotlib.colors import LinearSegmentedColormap
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
 
 TRANSPARENT_TO_RED = LinearSegmentedColormap.from_list(
     "TransparentToRed", [(1, 0, 0, 0), (1, 0, 0, 1)]
