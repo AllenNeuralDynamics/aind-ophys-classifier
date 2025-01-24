@@ -290,20 +290,20 @@ if __name__ == "__main__":
             g = f.create_group("border")
             g.create_dataset("labels", data=border_rois)
 
-    with open(output_dir / f"{plane_name}_data_process.json", "w") as f:
-        dp = DataProcess(
-            name=ProcessName.IMAGE_CELL_CLASSIFICATION,
-            software_version=os.getenv("VERSION", ""),
-            start_date_time=start_time,
-            end_date_time=dt.now(),
-            input_location=str(path),
-            output_location=str(
-                plane.output_dir / f"{plane_name}_classification.h5"
-            ),
-            code_url=(os.getenv("CODE_URL")),
-            parameters={
-                "border_size": args.border_size,
-                "model": "aind-roi-classifier-0.0.1",
-            },
-        )
-        f.write(dp.model_dump_json(indent=3))
+        with open(plane.output_dir / f"{plane_name}_data_process.json", "w") as f:
+            dp = DataProcess(
+                name=ProcessName.IMAGE_CELL_CLASSIFICATION,
+                software_version=os.getenv("VERSION", ""),
+                start_date_time=start_time,
+                end_date_time=dt.now(),
+                input_location=str(path),
+                output_location=str(
+                    plane.output_dir / f"{plane_name}_classification.h5"
+                ),
+                code_url=(os.getenv("CODE_URL")),
+                parameters={
+                    "border_size": args.border_size,
+                    "model": "aind-roi-classifier-0.0.1",
+                },
+            )
+            f.write(dp.model_dump_json(indent=3))
