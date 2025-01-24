@@ -298,7 +298,7 @@ if __name__ == "__main__":
             end_date_time=dt.now(),
             input_location=str(path),
             output_location=str(
-                output_dir.plane.output_dir / f"{plane_name}_classification.h5"
+                plane.output_dir / f"{plane_name}_classification.h5"
             ),
             code_url=(os.getenv("CODE_URL")),
             parameters={
