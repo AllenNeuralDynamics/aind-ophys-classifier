@@ -290,7 +290,7 @@ if __name__ == "__main__":
             g = f.create_group("border")
             g.create_dataset("labels", data=border_rois)
 
-    with open(output_dir / "data_process.json", "w") as f:
+    with open(output_dir / f"{plane_name}_data_process.json", "w") as f:
         dp = DataProcess(
             name=ProcessName.IMAGE_CELL_CLASSIFICATION,
             software_version=os.getenv("VERSION", ""),
