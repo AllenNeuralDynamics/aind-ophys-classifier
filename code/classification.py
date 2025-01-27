@@ -14,7 +14,6 @@ import roicat
 import sparse
 from aind_data_schema.core.processing import DataProcess, ProcessName
 from pint import UnitRegistry
-
 from plots import plot_border_rois, plot_predictions, plot_probabilities
 
 
@@ -30,6 +29,24 @@ class Plane:
 def classify_plane(
     rois: np.array, um_per_pixel: float, soma_classifier, dendrite_classifier
 ):
+    """Classify ROIs in a plane as soma or dendrite.
+
+    Parameters
+    ----------
+    rois : np.array
+        The ROIs.
+    um_per_pixel : float
+        The um_per_pixel value.
+    soma_classifier : object
+        The soma classifier.
+    dendrite_classifier : object
+        The dendrite classifier.
+
+    Returns
+    -------
+    Tuple[np.array, np.array, np.array, np.array]
+        The predictions and probabilities for soma and dendrite classifications.
+    """
     # ROInet embedding
     roinet = roicat.ROInet.ROInet_embedder(
         device=roicat.helpers.set_device(),  ## Which torch device to use ('cpu', 'cuda', etc.)
@@ -64,7 +81,18 @@ def classify_plane(
 
 
 def find_um_per_pixel(input_dir: Path) -> float:
-    # get um_per_pixel and dims (FOV size) from session.json
+    """Find the um_per_pixel value from the session.json file.
+
+    Parameters
+    ----------
+    input_dir : Path
+        Path to the input directory.
+
+    Returns
+    -------
+    float
+        The um_per_pixel value
+    """
     try:
         session_json_fp = next(input_dir.glob("session.json"))
     except StopIteration:
@@ -80,33 +108,73 @@ def find_um_per_pixel(input_dir: Path) -> float:
                 .to("um/pixel")
                 .magnitude
             )
-            dims = (fov["fov_height"], fov["fov_width"])
-
     return um_per_pixel
 
 
 def prepare_plane(extraction_file: Path, output_dir: Path) -> List[Plane]:
+    """Prepare a plane for classification by loading the ROIs and creating the output directory.
+
+    Parameters
+    ----------
+    extraction_file : Path
+        Path to the extraction file for the plane.
+    output_dir : Path
+        Path to the output directory.
+
+    Returns
+    -------
+    Plane
+        The plane object.
+    str
+        The name of the plane.
+    """
     plane_name = path.parts[-3]
     plane_dir = output_dir / plane_name / "classification"
     plane = Plane(
         name=plane_name,
         input_extraction_file=path,
         output_dir=plane_dir,
-        output_classification_file=plane_dir / "classification.h5",
+        output_classification_file=plane_dir / f"{plane_name}_classification.h5",
         rois=load_extraction_rois(extraction_file),
     )
 
     plane.output_dir.mkdir(parents=True, exist_ok=True)
 
-    return plane
+    return plane, plane_name
 
 
 def load_extraction_rois(extraction_file: Path) -> np.array:
+    """Load the ROIs from an extraction file.
+
+    Parameters
+    ----------
+    extraction_file : Path
+        Path to the extraction file.
+
+    Returns
+    -------
+    np.array
+        The ROIs.
+    """
     with h5py.File(extraction_file) as f:
         return sparse.COO(f["rois/coords"], f["rois/data"], f["rois/shape"]).todense()
 
 
 def classify_border_rois(rois: np.array, border_size: int) -> np.array:
+    """Classify ROIs that are on the border of the FOV.
+
+    Parameters
+    ----------
+    rois : np.array
+        The ROIs.
+    border_size : int
+        The distance from the border for an ROI to be considered on the border.
+
+    Returns
+    -------
+    np.array
+        A boolean array indicating which ROIs are on the border
+    """
     masks = np.where(rois > 0)
     border_rois = set()
     border_rois.update(masks[0][np.where(masks[1] < border_size)[0]].tolist())
@@ -176,7 +244,7 @@ if __name__ == "__main__":
     )
 
     for path in Path(input_dir).rglob("*extraction.h5"):
-        plane = prepare_plane(path, output_dir)
+        plane, plane_name = prepare_plane(path, output_dir)
 
         (
             soma_predictions,
@@ -190,9 +258,7 @@ if __name__ == "__main__":
             dendrite_classifier=dendrite_classifier,
         )
 
-        border_rois = classify_border_rois(
-            rois=plane.rois, border_size=args.border_size
-        )
+        border_rois = classify_border_rois(rois=plane.rois, border_size=args.border_size)
 
         ax = plot_probabilities(plane.rois, soma_probabilities, "soma probabilities")
         plt.savefig(str(plane.output_dir / "soma_probabilities.png"))
@@ -224,18 +290,20 @@ if __name__ == "__main__":
             g = f.create_group("border")
             g.create_dataset("labels", data=border_rois)
 
-    with open(output_dir / "data_process.json", "w") as f:
-        dp = DataProcess(
-            name=ProcessName.IMAGE_CELL_CLASSIFICATION,
-            software_version=os.getenv("VERSION", ""),
-            start_date_time=start_time,
-            end_date_time=dt.now(),
-            input_location=str(input_dir),
-            output_location=str(output_dir),
-            code_url=(os.getenv("CODE_URL")),
-            parameters={
-                "border_size": args.border_size,
-                "model": "aind-roi-classifier-0.0.1",
-            },
-        )
-        f.write(dp.model_dump_json(indent=3))
+        with open(plane.output_dir / f"{plane_name}_data_process.json", "w") as f:
+            dp = DataProcess(
+                name=ProcessName.IMAGE_CELL_CLASSIFICATION,
+                software_version=os.getenv("VERSION", ""),
+                start_date_time=start_time,
+                end_date_time=dt.now(),
+                input_location=str(path),
+                output_location=str(
+                    plane.output_dir / f"{plane_name}_classification.h5"
+                ),
+                code_url=(os.getenv("CODE_URL")),
+                parameters={
+                    "border_size": args.border_size,
+                    "model": "aind-roi-classifier-0.0.1",
+                },
+            )
+            f.write(dp.model_dump_json(indent=3))
