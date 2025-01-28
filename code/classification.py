@@ -261,21 +261,21 @@ if __name__ == "__main__":
         border_rois = classify_border_rois(rois=plane.rois, border_size=args.border_size)
 
         ax = plot_probabilities(plane.rois, soma_probabilities, "soma probabilities")
-        plt.savefig(str(plane.output_dir / "soma_probabilities.png"))
+        plt.savefig(str(plane.output_dir / f"{plane_name}_soma_probabilities.png"))
 
         ax = plot_probabilities(
             plane.rois, dendrite_probabilities, "dendrite probabilities"
         )
-        plt.savefig(str(plane.output_dir / "dendrite_probabilities.png"))
+        plt.savefig(str(plane.output_dir / f"{plane_name}_dendrite_probabilities.png"))
 
         ax = plot_predictions(plane.rois, soma_predictions, "soma predictions")
-        plt.savefig(str(plane.output_dir / "soma_predictions.png"))
+        plt.savefig(str(plane.output_dir / f"{plane_name}_soma_predictions.png"))
 
         ax = plot_predictions(plane.rois, dendrite_predictions, "dendrite predictions")
-        plt.savefig(str(plane.output_dir / "dendrite_predictions.png"))
+        plt.savefig(str(plane.output_dir / f"{plane_name}_dendrite_predictions.png"))
 
         ax = plot_border_rois(plane.rois, border_rois, "border ROIs")
-        plt.savefig(str(plane.output_dir / "border_rois.png"))
+        plt.savefig(str(plane.output_dir / f"{plane_name}_border_rois.png"))
 
         # save results
         with h5py.File(plane.output_classification_file, "w") as f:
