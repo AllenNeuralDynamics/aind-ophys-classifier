@@ -297,9 +297,7 @@ if __name__ == "__main__":
                 start_date_time=start_time,
                 end_date_time=dt.now(),
                 input_location=str(path),
-                output_location=str(
-                    plane.output_dir / f"{plane_name}_classification.h5"
-                ),
+                output_location=str(plane.output_dir / f"{plane_name}_classification.h5"),
                 code_url=(os.getenv("CODE_URL")),
                 parameters={
                     "border_size": args.border_size,
