@@ -70,7 +70,6 @@ def classify_plane(
             os.getenv("CO_CPUS", -1)
         ),  
     )
-    print(int(os.getenv("CO_CPUS", -1)))
     roinet.generate_latents()
 
     soma_predictions, soma_probabilities = soma_classifier(roinet.latents)
