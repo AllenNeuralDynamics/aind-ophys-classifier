@@ -66,6 +66,7 @@ def classify_plane(
         ROI_images=data.ROI_images,  ## Input images of ROIs
         um_per_pixel=data.um_per_pixel,  ## Resolution of FOV
         pref_plot=False,  ## Whether or not to plot the ROI sizes
+        batchSize_dataloader=16
     )
     roinet.generate_latents()
 
