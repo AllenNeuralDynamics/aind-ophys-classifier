@@ -13,7 +13,8 @@
 					"version": "1.2.0"
 				},
 				{
-					"name": "aind-qcportal-schema"
+					"name": "aind-qcportal-schema",
+					"version": "0.4.0"
 				},
 				{
 					"name": "h5py",

@@ -203,7 +203,7 @@ def write_qc_metrics(output_dir, unique_id):
     metric = QCMetric(
             name=f"{unique_id} Classification",
             description="Classification of ROIs as soma or dendrite",
-            reference=f"{unique_id}/classification/{unique_id}_combined_classifications.png"),
+            reference=f"{unique_id}/classification/{unique_id}_combined_classifications.png",
             status_history=[
                 QCStatus(
                     evaluator='Automated',
