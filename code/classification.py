@@ -370,5 +370,5 @@ if __name__ == "__main__":
                 },
             )
             f.write(dp.model_dump_json(indent=3))
-        write_qc_metrics(output_dir, plane_name)
+        write_qc_metrics(plane.output_dir, plane_name)
     
