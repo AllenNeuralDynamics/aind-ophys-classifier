@@ -15,7 +15,8 @@ import sparse
 from aind_data_schema.core.processing import DataProcess, ProcessName
 from pint import UnitRegistry
 from plots import plot_border_rois, plot_predictions, plot_probabilities
-
+from aind_data_schema.core.quality_control import (QCMetric, Status, QCStatus)
+from aind_qcportal_schema.metric_value import DropdownMetric
 
 @dataclass
 class Plane:
@@ -193,6 +194,67 @@ def classify_border_rois(rois: np.array, border_size: int) -> np.array:
     border_rois_bool[list(border_rois)] = True
 
     return border_rois_bool
+
+
+def write_qc_metrics(output_dir, unique_id):
+
+
+
+    metric = QCMetric(
+            name=f"{unique_id} Classification",
+            description="Classification of ROIs as soma or dendrite",
+            reference=f"{unique_id}/classification/{unique_id}_combined_classifications.png"),
+            status_history=[
+                QCStatus(
+                    evaluator='Automated',
+                    timestamp=dt.now(),
+                    status=Status.PASS
+                )
+            ],
+            value=DropdownMetric(
+                value="Reasonable",
+                options=[
+                    "Reasonable",
+                    "Unreasonable",
+                ],
+                status=[
+                    Status.PASS,
+                    Status.FAIL,
+                ]
+            )
+        )
+
+
+    with open(output_dir / f"{unique_id}_classification_metric.json", "w") as f:
+        json.dump([json.loads(metric.model_dump_json()) for metric in metrics], f, indent=4)
+
+    metric = QCMetric(
+            name=f"{unique_id} Border ROIs",
+            description="ROIs that are on the border of the FOV",
+            reference=f"{unique_id}/classification/{unique_id}_combined_classifications.png"),
+            status_history=[
+                QCStatus(
+                    evaluator='Automated',
+                    timestamp=dt.now(),
+                    status=Status.PASS
+                )
+            ],
+            value=DropdownMetric(
+                value="Reasonable",
+                options=[
+                    "Reasonable",
+                    "Unreasonable",
+                ],
+                status=[
+                    Status.PASS,
+                    Status.FAIL,
+                ]
+            )
+        )
+
+
+    with open(output_dir / f"{unique_id}_border_roi_metric.json", "w") as f:
+        json.dump([json.loads(metric.model_dump_json()) for metric in metrics], f, indent=4)
 
 
 if __name__ == "__main__":
