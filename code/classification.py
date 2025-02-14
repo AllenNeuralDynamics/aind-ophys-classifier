@@ -254,7 +254,7 @@ def write_qc_metrics(output_dir, unique_id):
 
 
     with open(output_dir / f"{unique_id}_border_roi_metric.json", "w") as f:
-        json.dump([json.loads(metric.model_dump_json()) for metric in metrics], f, indent=4)
+        json.dump(json.loads(metric.model_dump_json()), f, indent=4)
 
 
 if __name__ == "__main__":
