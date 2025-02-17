@@ -11,9 +11,7 @@ def plot_probabilities(rois, probabilities, title):
     prob_rois = (rois > 0) * probabilities[:, 1, np.newaxis, np.newaxis]
     fig, ax = plt.subplots()
     ax.imshow(rois.sum(axis=0), cmap="gray")
-    im = ax.imshow(
-        prob_rois.sum(axis=0), cmap=TRANSPARENT_TO_RED, clim=[0, 1], alpha=0.9
-    )
+    ax.imshow(prob_rois.sum(axis=0), cmap=TRANSPARENT_TO_RED, clim=[0, 1], alpha=0.9)
     ax.set_title(title)
     return ax
 

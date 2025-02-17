@@ -13,10 +13,11 @@ import numpy as np
 import roicat
 import sparse
 from aind_data_schema.core.processing import DataProcess, ProcessName
+from aind_data_schema.core.quality_control import QCMetric, QCStatus, Status
+from aind_qcportal_schema.metric_value import DropdownMetric
 from pint import UnitRegistry
 from plots import plot_border_rois, plot_predictions, plot_probabilities
-from aind_data_schema.core.quality_control import (QCMetric, Status, QCStatus)
-from aind_qcportal_schema.metric_value import DropdownMetric
+
 
 @dataclass
 class Plane:
@@ -50,13 +51,13 @@ def classify_plane(
     """
     # ROInet embedding
     roinet = roicat.ROInet.ROInet_embedder(
-        device=roicat.helpers.set_device(),  ## Which torch device to use ('cpu', 'cuda', etc.)
-        dir_networkFiles=args.tmp_dir,  ## Directory to download the pretrained network to
-        download_method="check_local_first",  ## Check to see if a model has already been downloaded to the location (will skip if hash matches)
-        download_url="https://osf.io/c8m3b/download",  ## URL of the model
-        download_hash="357a8d9b630ec79f3e015d0056a4c2d5",  ## Hash of the model file
-        forward_pass_version="head",  ## How the data is passed through the network
-        verbose=False,  ## Whether to print updates
+        device=roicat.helpers.set_device(),  # Which torch device to use ('cpu', 'cuda', etc.)
+        dir_networkFiles=args.tmp_dir,  # Directory to download the pretrained network to
+        download_method="check_local_first",  # Check to see if a model has already been downloaded to the location (will skip if hash matches) # noqa E501
+        download_url="https://osf.io/c8m3b/download",  # URL of the model
+        download_hash="357a8d9b630ec79f3e015d0056a4c2d5",  # Hash of the model file
+        forward_pass_version="head",  # How the data is passed through the network
+        verbose=False,  # Whether to print updates
     )
 
     data = roicat.data_importing.Data_roicat()
@@ -64,12 +65,10 @@ def classify_plane(
     data.transform_spatialFootprints_to_ROIImages(out_height_width=(36, 36))
 
     roinet.generate_dataloader(
-        ROI_images=data.ROI_images,  ## Input images of ROIs
-        um_per_pixel=data.um_per_pixel,  ## Resolution of FOV
-        pref_plot=False,  ## Whether or not to plot the ROI sizes
-        numWorkers_dataloader=int(
-            os.getenv("CO_CPUS", -1)
-        ),  
+        ROI_images=data.ROI_images,  # Input images of ROIs
+        um_per_pixel=data.um_per_pixel,  # Resolution of FOV
+        pref_plot=False,  # Whether or not to plot the ROI sizes
+        numWorkers_dataloader=int(os.getenv("CO_CPUS", -1)),
     )
     roinet.generate_latents()
 
@@ -196,62 +195,59 @@ def classify_border_rois(rois: np.array, border_size: int) -> np.array:
     return border_rois_bool
 
 
-def write_qc_metrics(output_dir, unique_id):
+def write_qc_metrics(output_dir: Path, unique_id: str) -> None:
+    """Write QC metrics to output directory
 
-
+    Parameters
+    ----------
+    output_dir : Path
+        Path to the output directory.
+    unique_id : str
+        Unique identifier for the plane.
+    """
 
     metric = QCMetric(
-            name=f"{unique_id} Classification",
-            description="Classification of ROIs as soma or dendrite",
-            reference=f"{unique_id}/classification/{unique_id}_combined_classifications.png",
-            status_history=[
-                QCStatus(
-                    evaluator='Automated',
-                    timestamp=dt.now(),
-                    status=Status.PASS
-                )
+        name=f"{unique_id} Classification",
+        description="Classification of ROIs as soma or dendrite",
+        reference=f"{unique_id}/classification/{unique_id}_combined_classifications.png",
+        status_history=[
+            QCStatus(evaluator="Automated", timestamp=dt.now(), status=Status.PASS)
+        ],
+        value=DropdownMetric(
+            value="Reasonable",
+            options=[
+                "Reasonable",
+                "Unreasonable",
             ],
-            value=DropdownMetric(
-                value="Reasonable",
-                options=[
-                    "Reasonable",
-                    "Unreasonable",
-                ],
-                status=[
-                    Status.PASS,
-                    Status.FAIL,
-                ]
-            )
-        )
-
+            status=[
+                Status.PASS,
+                Status.FAIL,
+            ],
+        ),
+    )
 
     with open(output_dir / f"{unique_id}_classification_metric.json", "w") as f:
-        json.dump(json.loads(metric.model_dump_json()) , f, indent=4)
+        json.dump(json.loads(metric.model_dump_json()), f, indent=4)
 
     metric = QCMetric(
-            name=f"{unique_id} Border ROIs",
-            description="ROIs that are on the border of the FOV",
-            reference=f"{unique_id}/classification/{unique_id}_combined_classifications.png",
-            status_history=[
-                QCStatus(
-                    evaluator='Automated',
-                    timestamp=dt.now(),
-                    status=Status.PASS
-                )
+        name=f"{unique_id} Border ROIs",
+        description="ROIs that are on the border of the FOV",
+        reference=f"{unique_id}/classification/{unique_id}_border_rois.png",
+        status_history=[
+            QCStatus(evaluator="Automated", timestamp=dt.now(), status=Status.PASS)
+        ],
+        value=DropdownMetric(
+            value="Reasonable",
+            options=[
+                "Reasonable",
+                "Unreasonable",
             ],
-            value=DropdownMetric(
-                value="Reasonable",
-                options=[
-                    "Reasonable",
-                    "Unreasonable",
-                ],
-                status=[
-                    Status.PASS,
-                    Status.FAIL,
-                ]
-            )
-        )
-
+            status=[
+                Status.PASS,
+                Status.FAIL,
+            ],
+        ),
+    )
 
     with open(output_dir / f"{unique_id}_border_roi_metric.json", "w") as f:
         json.dump(json.loads(metric.model_dump_json()), f, indent=4)
@@ -323,24 +319,40 @@ if __name__ == "__main__":
             dendrite_classifier=dendrite_classifier,
         )
 
-        border_rois = classify_border_rois(rois=plane.rois, border_size=args.border_size)
+        border_rois = classify_border_rois(
+            rois=plane.rois, border_size=args.border_size
+        )
 
         ax = plot_probabilities(plane.rois, soma_probabilities, "soma probabilities")
-        plt.savefig(str(plane.output_dir / f"{plane_name}_soma_probabilities.png"))
+        plt.savefig(
+            str(plane.output_dir / f"{plane_name}_soma_probabilities.png"),
+            bbox_inches="tight",
+        )
 
         ax = plot_probabilities(
             plane.rois, dendrite_probabilities, "dendrite probabilities"
         )
-        plt.savefig(str(plane.output_dir / f"{plane_name}_dendrite_probabilities.png"))
+        plt.savefig(
+            str(plane.output_dir / f"{plane_name}_dendrite_probabilities.png"),
+            bbox_inches="tight",
+        )
 
         ax = plot_predictions(plane.rois, soma_predictions, "soma predictions")
-        plt.savefig(str(plane.output_dir / f"{plane_name}_soma_predictions.png"))
+        plt.savefig(
+            str(plane.output_dir / f"{plane_name}_soma_predictions.png"),
+            bbox_inches="tight",
+        )
 
         ax = plot_predictions(plane.rois, dendrite_predictions, "dendrite predictions")
-        plt.savefig(str(plane.output_dir / f"{plane_name}_dendrite_predictions.png"))
+        plt.savefig(
+            str(plane.output_dir / f"{plane_name}_dendrite_predictions.png"),
+            bbox_inches="tight",
+        )
 
         ax = plot_border_rois(plane.rois, border_rois, "border ROIs")
-        plt.savefig(str(plane.output_dir / f"{plane_name}_border_rois.png"))
+        plt.savefig(
+            str(plane.output_dir / f"{plane_name}_border_rois.png"), bbox_inches="tight"
+        )
 
         # save results
         with h5py.File(plane.output_classification_file, "w") as f:
@@ -362,7 +374,9 @@ if __name__ == "__main__":
                 start_date_time=start_time,
                 end_date_time=dt.now(),
                 input_location=str(path),
-                output_location=str(plane.output_dir / f"{plane_name}_classification.h5"),
+                output_location=str(
+                    plane.output_dir / f"{plane_name}_classification.h5"
+                ),
                 code_url=(os.getenv("CODE_URL")),
                 parameters={
                     "border_size": args.border_size,
@@ -371,4 +385,3 @@ if __name__ == "__main__":
             )
             f.write(dp.model_dump_json(indent=3))
         write_qc_metrics(plane.output_dir, plane_name)
-    
