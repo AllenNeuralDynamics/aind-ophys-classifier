@@ -280,6 +280,15 @@ if __name__ == "__main__":
         help="Path of the classifier model, comma-delimited",
     )
     parser.add_argument(
+        "--model-name",
+        type=str,
+        default=None,
+        help=(
+            "Identifier recorded in data_process.json. "
+            "Defaults to the directory name of --soma-classifier-path."
+        ),
+    )
+    parser.add_argument(
         "--border-size",
         type=int,
         default=10,
@@ -289,6 +298,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
     input_dir = Path(args.input_dir).resolve()
     output_dir = Path(args.output_dir).resolve()
+
+    model_name = args.model_name or Path(args.soma_classifier_path).parent.name
+
+    for label, p in (
+        ("soma", args.soma_classifier_path),
+        ("dendrite", args.dendrite_classifier_path),
+    ):
+        if not Path(p).is_file():
+            raise FileNotFoundError(f"{label} classifier ONNX not found: {p}")
 
     um_per_pixel = find_um_per_pixel(input_dir)
 
@@ -380,7 +398,9 @@ if __name__ == "__main__":
                 code_url=(os.getenv("CODE_URL")),
                 parameters={
                     "border_size": args.border_size,
-                    "model": "aind-roi-classifier-0.0.1",
+                    "model": model_name,
+                    "soma_classifier_path": args.soma_classifier_path,
+                    "dendrite_classifier_path": args.dendrite_classifier_path,
                 },
             )
             f.write(dp.model_dump_json(indent=3))
