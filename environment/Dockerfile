@@ -1,12 +1,10 @@
-# hash:sha256:e7fb33f1eb05aa65271f1efd6add8d32f4d82e8cb728edd755e01e033ff05082
+# hash:sha256:41eb05b3162fb1fadab440fca9e2c5f37173bdaf364abab694949da62a10dd11
 ARG REGISTRY_HOST
 FROM $REGISTRY_HOST/codeocean/pytorch:2.4.0-cuda12.4.0-mambaforge24.5.0-0-python3.12.4-ubuntu22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
-
 ARG GIT_ASKPASS
-ARG GIT_ACCESS_TOKEN
-COPY git-askpass /
+COPY git-ask-pass /
 
 ENV VERSION=0.1.0
 ENV CODE_URL=https://github.com/allenNeuralDynamics/aind-ophys-classifier
