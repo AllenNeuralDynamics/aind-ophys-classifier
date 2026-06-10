@@ -27,11 +27,11 @@
 				},
 				{
 					"name": "roicat[all]",
-					"version": "1.4.4"
+					"version": "1.7.3"
 				},
 				{
 					"name": "sparse",
-					"version": "0.15.4"
+					"version": "0.18.0"
 				}
 			],
 			"options": {},

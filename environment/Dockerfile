@@ -1,4 +1,4 @@
-# hash:sha256:41eb05b3162fb1fadab440fca9e2c5f37173bdaf364abab694949da62a10dd11
+# hash:sha256:16d5385f4b82b5e8b7a51ad608c98bcf0cdf42919b52f38c4c1ddf43f38da5e4
 ARG REGISTRY_HOST
 FROM $REGISTRY_HOST/codeocean/pytorch:2.4.0-cuda12.4.0-mambaforge24.5.0-0-python3.12.4-ubuntu22.04
 
@@ -14,5 +14,5 @@ RUN pip install -U --no-cache-dir \
     aind-qcportal-schema==0.4.0 \
     h5py==3.12.1 \
     pint==0.24.4 \
-    roicat[all]==1.4.4 \
-    sparse==0.15.4
+    roicat[all]==1.7.3 \
+    sparse==0.18.0
