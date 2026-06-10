@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import json
 import os
 from dataclasses import dataclass
@@ -83,6 +84,26 @@ def classify_plane(
     )
 
 
+def file_md5(path: Path) -> str:
+    """Compute the MD5 hex digest of a file.
+
+    Parameters
+    ----------
+    path : Path
+        Path to the file.
+
+    Returns
+    -------
+    str
+        The MD5 hex digest.
+    """
+    md5 = hashlib.md5()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            md5.update(chunk)
+    return md5.hexdigest()
+
+
 def find_um_per_pixel(input_dir: Path) -> float:
     """Find the um_per_pixel value from the session.json file.
 
@@ -131,11 +152,11 @@ def prepare_plane(extraction_file: Path, output_dir: Path) -> List[Plane]:
     str
         The name of the plane.
     """
-    plane_name = path.parts[-3]
+    plane_name = extraction_file.parts[-3]
     plane_dir = output_dir / plane_name / "classification"
     plane = Plane(
         name=plane_name,
-        input_extraction_file=path,
+        input_extraction_file=extraction_file,
         output_dir=plane_dir,
         output_classification_file=plane_dir / f"{plane_name}_classification.h5",
         rois=load_extraction_rois(extraction_file),
@@ -308,16 +329,19 @@ if __name__ == "__main__":
         if not Path(p).is_file():
             raise FileNotFoundError(f"{label} classifier ONNX not found: {p}")
 
+    soma_classifier_md5_hash = file_md5(Path(args.soma_classifier_path))
+    dendrite_classifier_md5_hash = file_md5(Path(args.dendrite_classifier_path))
+
     um_per_pixel = find_um_per_pixel(input_dir)
 
     soma_classifier = (
-        roicat.classification.classifier.Load_ONNX_model_sklearnLogisticRegression(
+        roicat.classification.classifier.ONNX_model_sklearnLogisticRegression(
             args.soma_classifier_path
         )
     )
 
     dendrite_classifier = (
-        roicat.classification.classifier.Load_ONNX_model_sklearnLogisticRegression(
+        roicat.classification.classifier.ONNX_model_sklearnLogisticRegression(
             args.dendrite_classifier_path
         )
     )
@@ -400,7 +424,9 @@ if __name__ == "__main__":
                     "border_size": args.border_size,
                     "model": model_name,
                     "soma_classifier_path": args.soma_classifier_path,
+                    "soma_classifier_md5_hash": soma_classifier_md5_hash,
                     "dendrite_classifier_path": args.dendrite_classifier_path,
+                    "dendrite_classifier_md5_hash": dendrite_classifier_md5_hash,
                 },
             )
             f.write(dp.model_dump_json(indent=3))
