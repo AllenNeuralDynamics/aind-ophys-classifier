@@ -25,7 +25,7 @@
 		{
 			"id": "Hv5bV5Q4EmPUxJKV",
 			"name": "tmp_dir",
-			"param_name": "tmp_dir",
+			"param_name": "tmp-dir",
 			"description": "Directory into which to write temporary files",
 			"help_text": "Directory into which to write temporary files",
 			"type": "text",
@@ -35,7 +35,7 @@
 		{
 			"id": "CIWMxY6DQe7bCbPW",
 			"name": "soma_classifier_path",
-			"param_name": "soma_classifier_path",
+			"param_name": "soma-classifier-path",
 			"description": "Path of the classifier model, comma-delimited",
 			"help_text": "Path of the classifier model, comma-delimited",
 			"type": "text",
@@ -45,7 +45,7 @@
 		{
 			"id": "QRc3gP7oBysitftz",
 			"name": "dendrite_classifier_path",
-			"param_name": "dendrite_classifier_path",
+			"param_name": "dendrite-classifier-path",
 			"description": "Path of the classifier model, comma-delimited",
 			"help_text": "Path of the classifier model, comma-delimited",
 			"type": "text",
@@ -55,7 +55,7 @@
 		{
 			"id": "eZAFDkwYnqAtjkzQ",
 			"name": "model_name",
-			"param_name": "model_name",
+			"param_name": "model-name",
 			"description": "Identifier recorded in data_process.json. Defaults to the directory name of --soma-classifier-path.",
 			"help_text": "Identifier recorded in data_process.json. Defaults to the directory name of --soma-classifier-path.",
 			"type": "text",
@@ -64,7 +64,7 @@
 		{
 			"id": "Zx6AUkutzqaN2y2U",
 			"name": "border_size",
-			"param_name": "border_size",
+			"param_name": "border-size",
 			"description": "Distance from border for ROI to be classified on the border",
 			"help_text": "Distance from border for ROI to be classified on the border",
 			"type": "text",
