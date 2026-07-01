@@ -3,7 +3,8 @@
 	"base_image": "codeocean/pytorch:2.4.0-cuda12.4.0-mambaforge24.5.0-0-python3.12.4-ubuntu22.04",
 	"options": {
 		"registry_host_arg": true,
-		"git_ask_pass": true
+		"git_ask_pass": true,
+		"mount_secrets": true
 	},
 	"installers": {
 		"pip": {
@@ -26,11 +27,11 @@
 				},
 				{
 					"name": "roicat[all]",
-					"version": "1.4.4"
+					"version": "1.7.3"
 				},
 				{
 					"name": "sparse",
-					"version": "0.15.4"
+					"version": "0.18.0"
 				}
 			],
 			"options": {},

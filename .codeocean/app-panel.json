@@ -1,0 +1,75 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"parameters": [
+		{
+			"id": "Vyufo3JKznCsjSSM",
+			"name": "i",
+			"param_name": "i",
+			"description": "Input directory",
+			"help_text": "Input directory",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "/data"
+		},
+		{
+			"id": "uLxfLCxchor5FGlO",
+			"name": "o",
+			"param_name": "o",
+			"description": "Output directory",
+			"help_text": "Output directory",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "/results"
+		},
+		{
+			"id": "Hv5bV5Q4EmPUxJKV",
+			"name": "tmp_dir",
+			"param_name": "tmp_dir",
+			"description": "Directory into which to write temporary files",
+			"help_text": "Directory into which to write temporary files",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "/scratch"
+		},
+		{
+			"id": "CIWMxY6DQe7bCbPW",
+			"name": "soma_classifier_path",
+			"param_name": "soma_classifier_path",
+			"description": "Path of the classifier model, comma-delimited",
+			"help_text": "Path of the classifier model, comma-delimited",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "/data/2p_roi_classifier/soma.classification_training.autoclassifier.onnx"
+		},
+		{
+			"id": "QRc3gP7oBysitftz",
+			"name": "dendrite_classifier_path",
+			"param_name": "dendrite_classifier_path",
+			"description": "Path of the classifier model, comma-delimited",
+			"help_text": "Path of the classifier model, comma-delimited",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "/data/2p_roi_classifier/dendrite.classification_training.autoclassifier.onnx"
+		},
+		{
+			"id": "eZAFDkwYnqAtjkzQ",
+			"name": "model_name",
+			"param_name": "model_name",
+			"description": "Identifier recorded in data_process.json. Defaults to the directory name of --soma-classifier-path.",
+			"help_text": "Identifier recorded in data_process.json. Defaults to the directory name of --soma-classifier-path.",
+			"type": "text",
+			"value_type": "string"
+		},
+		{
+			"id": "Zx6AUkutzqaN2y2U",
+			"name": "border_size",
+			"param_name": "border_size",
+			"description": "Distance from border for ROI to be classified on the border",
+			"help_text": "Distance from border for ROI to be classified on the border",
+			"type": "text",
+			"value_type": "integer",
+			"default_value": "10"
+		}
+	]
+}
