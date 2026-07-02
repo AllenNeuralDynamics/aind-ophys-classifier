@@ -397,18 +397,22 @@ if __name__ == "__main__":
         )
 
         # save results
-        # Datasets are named with a `roicat_` prefix to make their
-        # provenance (the ROICaT classifier) explicit and to avoid
-        # collision with other per-ROI probabilities (e.g. the
-        # extraction cellpose_soma_probability). These names match the
-        # NWB roi_table column names written downstream.
+        # Outputs keep their per-cell-type groups (`soma`, `dendrites`),
+        # with fully-qualified `roicat_*` dataset names inside so their
+        # provenance (the ROICaT classifier) is explicit and they map
+        # directly to the flat `roicat_*` NWB roi_table columns written
+        # downstream (avoiding collision with the extraction
+        # `rois/cellpose_soma_probability`).
         with h5py.File(plane.output_classification_file, "w") as f:
-            f.create_dataset("roicat_is_soma", data=soma_predictions)
-            f.create_dataset(
+            g = f.create_group("soma")
+            g.create_dataset("roicat_is_soma", data=soma_predictions)
+            g.create_dataset(
                 "roicat_soma_probability", data=soma_probabilities
             )
-            f.create_dataset("roicat_is_dendrite", data=dendrite_predictions)
-            f.create_dataset(
+
+            g = f.create_group("dendrites")
+            g.create_dataset("roicat_is_dendrite", data=dendrite_predictions)
+            g.create_dataset(
                 "roicat_dendrite_probability", data=dendrite_probabilities
             )
 
