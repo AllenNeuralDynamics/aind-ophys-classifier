@@ -398,22 +398,25 @@ if __name__ == "__main__":
 
         # save results
         # Outputs keep their per-cell-type groups (`soma`, `dendrites`),
-        # with fully-qualified `roicat_*` dataset names inside so their
-        # provenance (the ROICaT classifier) is explicit and they map
-        # directly to the flat `roicat_*` NWB roi_table columns written
-        # downstream (avoiding collision with the extraction
+        # mirroring the pre-existing `predictions`/`probabilities`
+        # dataset names with a `roicat_` prefix to make their provenance
+        # (the ROICaT classifier) explicit. The group + dataset map to
+        # flat `roicat_soma_*` / `roicat_dendrite_*` NWB roi_table
+        # columns downstream (avoiding collision with the extraction
         # `rois/cellpose_soma_probability`).
         with h5py.File(plane.output_classification_file, "w") as f:
             g = f.create_group("soma")
-            g.create_dataset("roicat_is_soma", data=soma_predictions)
+            g.create_dataset("roicat_predictions", data=soma_predictions)
             g.create_dataset(
-                "roicat_soma_probability", data=soma_probabilities
+                "roicat_probabilities", data=soma_probabilities
             )
 
             g = f.create_group("dendrites")
-            g.create_dataset("roicat_is_dendrite", data=dendrite_predictions)
             g.create_dataset(
-                "roicat_dendrite_probability", data=dendrite_probabilities
+                "roicat_predictions", data=dendrite_predictions
+            )
+            g.create_dataset(
+                "roicat_probabilities", data=dendrite_probabilities
             )
 
             g = f.create_group("border")
