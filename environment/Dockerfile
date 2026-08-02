@@ -1,4 +1,4 @@
-# hash:sha256:16d5385f4b82b5e8b7a51ad608c98bcf0cdf42919b52f38c4c1ddf43f38da5e4
+# hash:sha256:1c066d4b5b6298d976cc10986201cce87881975f4d8365ea25b6249eaae37bf8
 ARG REGISTRY_HOST
 FROM $REGISTRY_HOST/codeocean/pytorch:2.4.0-cuda12.4.0-mambaforge24.5.0-0-python3.12.4-ubuntu22.04
 
@@ -9,10 +9,7 @@ COPY git-ask-pass /
 ENV VERSION=0.1.0
 ENV CODE_URL=https://github.com/allenNeuralDynamics/aind-ophys-classifier
 
-RUN pip install -U --no-cache-dir \
-    aind-data-schema==1.2.0 \
-    aind-qcportal-schema==0.4.0 \
-    h5py==3.12.1 \
-    pint==0.24.4 \
-    roicat[all]==1.7.3 \
-    sparse==0.18.0
+RUN --mount=type=secret,id=git-access-token \
+    GIT_ACCESS_TOKEN="$(cat /run/secrets/git-access-token)" \
+    pip3 install -U --no-cache-dir \
+    -e git+https://github.com/AllenNeuralDynamics/aind-ophys-classifier-library.git@75c3719#egg=aind-ophys-classifier-library

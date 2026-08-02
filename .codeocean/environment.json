@@ -7,31 +7,10 @@
 		"mount_secrets": true
 	},
 	"installers": {
-		"pip": {
+		"pip3": {
 			"packages": [
 				{
-					"name": "aind-data-schema",
-					"version": "1.2.0"
-				},
-				{
-					"name": "aind-qcportal-schema",
-					"version": "0.4.0"
-				},
-				{
-					"name": "h5py",
-					"version": "3.12.1"
-				},
-				{
-					"name": "pint",
-					"version": "0.24.4"
-				},
-				{
-					"name": "roicat[all]",
-					"version": "1.7.3"
-				},
-				{
-					"name": "sparse",
-					"version": "0.18.0"
+					"name": "git+https://github.com/AllenNeuralDynamics/aind-ophys-classifier-library.git@75c3719#egg=aind-ophys-classifier-library"
 				}
 			],
 			"options": {},
