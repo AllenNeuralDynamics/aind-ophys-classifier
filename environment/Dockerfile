@@ -1,15 +1,13 @@
-# hash:sha256:e7fb33f1eb05aa65271f1efd6add8d32f4d82e8cb728edd755e01e033ff05082
-ARG REGISTRY_HOST
-FROM $REGISTRY_HOST/codeocean/pytorch:2.4.0-cuda12.4.0-mambaforge24.5.0-0-python3.12.4-ubuntu22.04
+FROM pytorch/pytorch:2.4.0-cuda12.4-cudnn9-runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG GIT_ASKPASS
-ARG GIT_ACCESS_TOKEN
-COPY git-askpass /
-
 ENV VERSION=0.1.0
-ENV CODE_URL=https://github.com/allenNeuralDynamics/aind-ophys-classifier
+ENV CODE_URL=https://github.com/AllenNeuralDynamics/aind-ophys-classifier
+
+RUN apt-get update && apt-get install -y \
+    libx11-6 libxext6 libxrender1 tk \
+ && rm -rf /var/lib/apt/lists/*
 
 RUN pip install -U --no-cache-dir \
     aind-data-schema==1.2.0 \
@@ -18,3 +16,6 @@ RUN pip install -U --no-cache-dir \
     pint==0.24.4 \
     roicat[all]==1.4.4 \
     sparse==0.15.4
+
+RUN mkdir -p /data /results /scratch /capsule/code
+COPY code/ /capsule/code/
