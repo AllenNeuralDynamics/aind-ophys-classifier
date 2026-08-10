@@ -10,7 +10,7 @@
 		"pip3": {
 			"packages": [
 				{
-					"name": "git+https://github.com/AllenNeuralDynamics/aind-ophys-classifier-library.git@c673b93#egg=aind-ophys-classifier-library"
+					"name": "git+https://github.com/AllenNeuralDynamics/aind-ophys-classifier-library.git@d67eb24#egg=aind-ophys-classifier-library"
 				}
 			],
 			"options": {},
