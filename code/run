@@ -15,26 +15,49 @@ echo "${TAG} inputs: $(ls ../data | tr '\n' ' ')"
 # next to the archive, so the mount itself cannot be used directly.
 # ROINET_WORK_DIR is overridable so this block is testable off Code Ocean.
 # Candidate mounts are searched in order; ROINET_STAGED_DIR overrides the list.
+# The asset also carries the Torchvision ConvNeXt-Tiny checkpoint that the
+# archive's model.py needs: it constructs a pretrained ConvNeXt before loading
+# ROInet's own state dictionary, so the checkpoint is a second download unless
+# TORCH_HOME points at the mounted copy. Torch resolves it under
+# $TORCH_HOME/hub/checkpoints, which is why the asset nests it that way.
+ROINET_ASSET_DIR="${ROINET_ASSET_DIR:-/data/roinet}"
 ROINET_WORK_DIR="${ROINET_WORK_DIR:-/scratch/roinet}"
 ROINET_CANDIDATES=(
   "${ROINET_STAGED_DIR:-}"
+  "${ROINET_ASSET_DIR}"
   ../data/2p_ophys_classifier
   ../data/2p_roi_classifier
   ../data/roinet
 )
+CONVNEXT_REL="torch/hub/checkpoints/convnext_tiny-983f1562.pth"
 ROINET_ARGS=()
 for candidate in "${ROINET_CANDIDATES[@]}"; do
   [ -n "${candidate}" ] || continue
   if [ -f "${candidate}/ROInet.zip" ]; then
     echo "${TAG} ROInet: using pre-staged ${candidate}/ROInet.zip"
+    # Only the archive is copied. roicat unpacks params.json / model.py / *.pth
+    # beside it, so its extraction directory must be writable and cannot be the
+    # read-only mount. The checkpoint is read in place and never copied.
     mkdir -p "${ROINET_WORK_DIR}"
     cp "${candidate}/ROInet.zip" "${ROINET_WORK_DIR}/"
     ROINET_ARGS=(--roinet_dir="${ROINET_WORK_DIR}")
+    if [ -f "${candidate}/${CONVNEXT_REL}" ]; then
+      export TORCH_HOME="${candidate}/torch"
+      echo "${TAG} ROInet: TORCH_HOME=${TORCH_HOME} (ConvNeXt checkpoint mounted)"
+    else
+      # A writable cache, never the mount: pointing TORCH_HOME at a path with
+      # no checkpoint makes torch try to write the download into read-only /data.
+      export TORCH_HOME="${ROINET_WORK_DIR}/torch"
+      echo "${TAG} ROInet: ${candidate}/${CONVNEXT_REL} absent;" \
+           "TORCH_HOME=${TORCH_HOME} so the ConvNeXt download stays writable"
+    fi
     break
   fi
 done
 if [ ${#ROINET_ARGS[@]} -eq 0 ]; then
-  echo "${TAG} ROInet: no pre-staged ROInet.zip in ${ROINET_CANDIDATES[*]}; it will be downloaded (~105 MB from osf.io)"
+  export TORCH_HOME="${ROINET_WORK_DIR}/torch"
+  echo "${TAG} ROInet: no pre-staged ROInet.zip in ${ROINET_CANDIDATES[*]};" \
+       "it will be downloaded (~105 MB from osf.io), ConvNeXt into ${TORCH_HOME}"
 fi
 
 # Plain text, so tag every line.
