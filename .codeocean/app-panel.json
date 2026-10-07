@@ -88,16 +88,6 @@
 			"help_text": "Directory holding a pre-staged ROInet.zip. When set, the network files are loaded from there instead of being downloaded, which is required inside the pipeline where every task otherwise re-fetches ~105 MB from osf.io.",
 			"type": "text",
 			"value_type": "string"
-		},
-		{
-			"id": "MyhbDWXH04XwUqiv",
-			"name": "verify",
-			"param_name": "verify",
-			"description": "Round-trip the emitted processing.json and quality_control.json through the core v2 schema objects after writing.",
-			"help_text": "Round-trip the emitted processing.json and quality_control.json through the core v2 schema objects after writing.",
-			"type": "text",
-			"value_type": "integer",
-			"default_value": "0"
 		}
 	]
 }
