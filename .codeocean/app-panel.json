@@ -36,21 +36,19 @@
 			"id": "86GgklrNhL06eqOY",
 			"name": "soma_classifier_path",
 			"param_name": "soma_classifier_path",
-			"description": "Path to the soma classifier ONNX model.",
-			"help_text": "Path to the soma classifier ONNX model.",
+			"description": "Path to the soma classifier ONNX model. Defaults to input_dir/2p_roi_classifier/soma.classification_training.autoclassifier.onnx.",
+			"help_text": "Path to the soma classifier ONNX model. Defaults to input_dir/2p_roi_classifier/soma.classification_training.autoclassifier.onnx.",
 			"type": "text",
-			"value_type": "string",
-			"default_value": "/data/2p_roi_classifier/soma.classification_training.autoclassifier.onnx"
+			"value_type": "string"
 		},
 		{
 			"id": "o2128ikjPvHggy0k",
 			"name": "dendrite_classifier_path",
 			"param_name": "dendrite_classifier_path",
-			"description": "Path to the dendrite classifier ONNX model.",
-			"help_text": "Path to the dendrite classifier ONNX model.",
+			"description": "Path to the dendrite classifier ONNX model. Defaults to input_dir/2p_roi_classifier/dendrite.classification_training.autoclassifier.onnx.",
+			"help_text": "Path to the dendrite classifier ONNX model. Defaults to input_dir/2p_roi_classifier/dendrite.classification_training.autoclassifier.onnx.",
 			"type": "text",
-			"value_type": "string",
-			"default_value": "/data/2p_roi_classifier/dendrite.classification_training.autoclassifier.onnx"
+			"value_type": "string"
 		},
 		{
 			"id": "7Y3V9E6Kx817FsGM",
