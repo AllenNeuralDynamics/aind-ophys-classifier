@@ -36,21 +36,19 @@
 			"id": "86GgklrNhL06eqOY",
 			"name": "soma_classifier_path",
 			"param_name": "soma_classifier_path",
-			"description": "Path to the soma classifier ONNX model.",
-			"help_text": "Path to the soma classifier ONNX model.",
+			"description": "Path to the soma classifier ONNX model. Defaults to input_dir/2p_roi_classifier/soma.classification_training.autoclassifier.onnx.",
+			"help_text": "Path to the soma classifier ONNX model. Defaults to input_dir/2p_roi_classifier/soma.classification_training.autoclassifier.onnx.",
 			"type": "text",
-			"value_type": "string",
-			"default_value": "/data/2p_roi_classifier/soma.classification_training.autoclassifier.onnx"
+			"value_type": "string"
 		},
 		{
 			"id": "o2128ikjPvHggy0k",
 			"name": "dendrite_classifier_path",
 			"param_name": "dendrite_classifier_path",
-			"description": "Path to the dendrite classifier ONNX model.",
-			"help_text": "Path to the dendrite classifier ONNX model.",
+			"description": "Path to the dendrite classifier ONNX model. Defaults to input_dir/2p_roi_classifier/dendrite.classification_training.autoclassifier.onnx.",
+			"help_text": "Path to the dendrite classifier ONNX model. Defaults to input_dir/2p_roi_classifier/dendrite.classification_training.autoclassifier.onnx.",
 			"type": "text",
-			"value_type": "string",
-			"default_value": "/data/2p_roi_classifier/dendrite.classification_training.autoclassifier.onnx"
+			"value_type": "string"
 		},
 		{
 			"id": "7Y3V9E6Kx817FsGM",
@@ -75,8 +73,8 @@
 			"id": "al7UZ3FU5L2UoYKW",
 			"name": "um_per_pixel",
 			"param_name": "um_per_pixel",
-			"description": "Micrometres per pixel, used to scale the ROI images fed to ROInet. Read from the acquisition metadata when omitted; supply it explicitly only when the metadata does not carry it, because an incorrect value silently changes every classification.",
-			"help_text": "Micrometres per pixel, used to scale the ROI images fed to ROInet. Read from the acquisition metadata when omitted; supply it explicitly only when the metadata does not carry it, because an incorrect value silently changes every classification.",
+			"description": "Micrometres per pixel used to scale the ROI images fed to ROInet. Read from the acquisition metadata when omitted.",
+			"help_text": "Micrometres per pixel used to scale the ROI images fed to ROInet. Read from the acquisition metadata when omitted.",
 			"type": "text",
 			"value_type": "number"
 		},
@@ -84,8 +82,8 @@
 			"id": "SEFd6kbeQatsp3W7",
 			"name": "roinet_dir",
 			"param_name": "roinet_dir",
-			"description": "Directory holding a pre-staged ROInet.zip. When set, the network files are loaded from there instead of being downloaded, which is required inside the pipeline where every task otherwise re-fetches ~105 MB from osf.io.",
-			"help_text": "Directory holding a pre-staged ROInet.zip. When set, the network files are loaded from there instead of being downloaded, which is required inside the pipeline where every task otherwise re-fetches ~105 MB from osf.io.",
+			"description": "Directory holding a pre-staged ROInet.zip. When set, the network files are loaded from there instead of being downloaded.",
+			"help_text": "Directory holding a pre-staged ROInet.zip. When set, the network files are loaded from there instead of being downloaded.",
 			"type": "text",
 			"value_type": "string"
 		}
