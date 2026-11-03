@@ -20,8 +20,8 @@ echo "${TAG} inputs: $(ls ../data | tr '\n' ' ')"
 # ROInet's own state dictionary, so the checkpoint is a second download unless
 # TORCH_HOME points at the mounted copy. Torch resolves it under
 # $TORCH_HOME/hub/checkpoints, which is why the asset nests it that way.
-ROINET_ASSET_DIR="${ROINET_ASSET_DIR:-/data/roinet}"
-ROINET_WORK_DIR="${ROINET_WORK_DIR:-/scratch/roinet}"
+ROINET_ASSET_DIR="${ROINET_ASSET_DIR:-${PWD}/../data/roinet}"
+ROINET_WORK_DIR="${ROINET_WORK_DIR:-${PWD}/../scratch/roinet}"
 ROINET_CANDIDATES=(
   "${ROINET_STAGED_DIR:-}"
   "${ROINET_ASSET_DIR}"
@@ -46,7 +46,7 @@ for candidate in "${ROINET_CANDIDATES[@]}"; do
       echo "${TAG} ROInet: TORCH_HOME=${TORCH_HOME} (ConvNeXt checkpoint mounted)"
     else
       # A writable cache, never the mount: pointing TORCH_HOME at a path with
-      # no checkpoint makes torch try to write the download into read-only /data.
+      # no checkpoint makes torch try to write the download into the read-only mount.
       export TORCH_HOME="${ROINET_WORK_DIR}/torch"
       echo "${TAG} ROInet: ${candidate}/${CONVNEXT_REL} absent;" \
            "TORCH_HOME=${TORCH_HOME} so the ConvNeXt download stays writable"
